@@ -1,5 +1,27 @@
 .App {
-  text-align: center;
+  background-color: rgb(255, 255, 253);
+  min-height: 100vh;
+}
+
+.logo-text-teen {
+  font-size: 5rem;
+  line-height: 0.9;
+}
+
+.logo-text-kitchen {
+  font-size: 5rem;
+  line-height: 0.9;
+}
+
+.logo-text-companion {
+  font-size: 3.4rem;
+  line-height: 1.1;
+}
+
+.acumin {
+  font-family: acumin-pro-extra-condensed, sans-serif;
+  font-weight: 700;
+  font-style: normal;
 }
 
 .App-logo {
