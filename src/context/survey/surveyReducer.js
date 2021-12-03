@@ -9,16 +9,26 @@ import Option from '../../model/survey/Option';
 const SurveyReducer = (state, action) => {
   switch(action.type) {
     case SET_SHORT_ANSWER:
-      const { shortAnsQuestionName, value } = action.payload;
+      const { shortAnsQuestionName, shortAnsResponse } = action.payload;
 
+      console.log('SurveyReducer:state')
+      console.log(state)
+      console.log(shortAnsQuestionName)
+      console.log(shortAnsResponse)
       return {
         ...state,
-        [shortAnsQuestionName]: value
+          [shortAnsQuestionName]: shortAnsResponse
       };
-    case SET_MULTCHOICE:
-      const { arrayName, selectedOption } = action.payload;
 
-      const newOptions = state[arrayName].map((option) => {
+    case SET_MULTCHOICE:
+      const { questionName, selectedOption } = action.payload;
+
+      console.log('action.payload')
+      console.log(action.payload)
+      console.log('state')
+      console.log(state)
+
+      const newOptions = state[questionName].map((option) => {
         const { optionText } = option;
 
         if (optionText === selectedOption) {
@@ -31,24 +41,12 @@ const SurveyReducer = (state, action) => {
 
       return {
         ...state,
-        [arrayName]: newOptions
+        [questionName]: newOptions
       };
 
     case CLEAR:
-      // action.payload contains the name of the property we want
-      const questionName = action.payload;
-      
-      const clearedCandy = state[questionName].map((opt) => {
-        const { optionText } = opt;
-        return {optionText: optionText, isSelected: false};
-      });
-
-      return {
-        ...state,
-        name: '',
-        color: '',
-        [questionName]: clearedCandy
-      };
+      // initialState from SurveyState was passed into action.payload
+      return action.payload;
     default:
       return state;
   }

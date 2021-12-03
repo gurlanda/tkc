@@ -8,11 +8,8 @@ import Survey from './components/pages/Survey';
 import Demo from './components/dexie-demo/DexieDemo';
 import NotFound from './components/pages/NotFound';
 
-import SurveyState from './context/survey/SurveyState';
-
 function App() {
   return (
-    <SurveyState>
     <Router>
       <div className="App">
           <Navbar />
@@ -25,7 +22,6 @@ function App() {
           </Switch>
       </div>
     </Router>
-    </SurveyState>
   );
 }
 

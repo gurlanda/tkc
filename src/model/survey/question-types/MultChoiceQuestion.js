@@ -1,6 +1,6 @@
-import Option from './Option';
-import Question from './Question';
-import { MULT_CHOICE } from './questionTypes';
+import Option from '../Option';
+import Question from '../Question';
+import { MULT_CHOICE } from '../questionTypes';
 
 class MultChoiceQuestion extends Question{
   constructor(isRequired, questionName, questionText, ...optionTexts) {
@@ -11,6 +11,6 @@ class MultChoiceQuestion extends Question{
       optionText => this.options.push(new Option(optionText))
     );
   }
-}
+} 
 
 export default MultChoiceQuestion;

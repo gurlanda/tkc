@@ -2,20 +2,20 @@ import React, { Fragment } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks';
 import SampleItem from './SampleItem';
 
-import { Database } from '../../model/database/Database';
+import { demoSurveyDB_v1 as db } from '../../model/database/Database';
 
 const DexieDemo = () => {
-  const allItems = useLiveQuery(() => Database.answers.toArray(), []);
+  const allResponses = useLiveQuery(() => db.responses.toArray(), []);
 
-  if (!allItems) return <h1 className='title'>No items yet!</h1>;
+  if (!allResponses) return <h1 className='title'>Loading...</h1>;
 
   else {
     return (
       <Fragment>
-        {allItems.length > 0 ?
-          allItems.map(
-            (item) => 
-            {return <SampleItem item={item} key={item.id}/>})
+        {allResponses.length > 0 ?
+          allResponses.map(
+            (response) => 
+            {return <SampleItem response={response} key={response.responseID}/>})
           : <h1 className='title'>No items yet!</h1>}
       </Fragment>
     )

@@ -2,69 +2,51 @@ import React, { useReducer } from 'react';
 import SurveyContext from './surveyContext';
 import SurveyReducer from './surveyReducer';
 import { 
-  SET_NAME, 
-  SET_COLOR, 
   CLEAR,
   SET_SHORT_ANSWER,
   SET_MULTCHOICE
 } from '../types';
 
-import { Database } from '../../model/database/Database';
+import { MULT_CHOICE, SHORT_ANSWER } from '../../model/survey/questionTypes';
 
-import  { candyQuestion } from '../../model/survey/DemoQuestions';
+import { demoSurveyDB_v1 as db } from '../../model/database/Database';
 
-const SurveyState = (props) => {
-  const appendMultChoiceToState = (multChoiceQ, state) => {
-    // Append the options to the state
-    let newState = {
-      ...state,
-      // Deep copy the array
-      [multChoiceQ.questionName]: multChoiceQ.options.map(opt => {return {...opt}})
-    };
+const SurveyState = ({ questionsArray, children }) => {
+  // Set the initial state dynamically
+  let initialState = {};
+  questionsArray.forEach((question) => {
+    const { questionType, questionName } = question;
 
-    return newState;
-  };
+    switch(questionType) {
+      case MULT_CHOICE:
+        initialState = {
+          ...initialState,
+          // Deep copy the array
+          [questionName]: question.options.map(opt => {return {...opt}})
+        };
+        break;
 
-  // eslint-disable-next-line
-  const appendShortAnswerToState = (shortAnswerQ, state) => {
-    let newState = {
-      ...state,
-      [shortAnswerQ.questionName]: ''
+      case SHORT_ANSWER:
+        initialState = {
+          ...initialState,
+          [questionName]: ''
+        };
+        break;
+
+      default:
+        // do nothing
     }
+  });
 
-    return newState;
-  }
+  const [state, dispatch] = useReducer(SurveyReducer, initialState);
 
-  const initialState = {
-    name: '',
-    color: ''
-  };
-
-  const [state, dispatch] = useReducer(SurveyReducer, 
-    appendMultChoiceToState(candyQuestion, initialState));
-
-  // Update name
-  const setName = (name) => {
-    dispatch({
-      type: SET_NAME,
-      payload: name
-    });
-  }
-
-  // Update color
-  const setColor = (color) => {
-    dispatch({
-      type: SET_COLOR,
-      payload: color
-    });
-  }
-
-  const setShortAnswer = (questionName, value ) => {
+  // Updates the state of a short answer question
+  const setShortAnswer = (questionName, value) => {
     dispatch({
       type: SET_SHORT_ANSWER,
       payload: {
         shortAnsQuestionName: questionName,
-        value: value
+        shortAnsResponse: value
       }
     })
   };
@@ -74,59 +56,66 @@ const SurveyState = (props) => {
     dispatch({
       type: SET_MULTCHOICE,
       payload: { 
-        arrayName: questionName, 
+        questionName: questionName, 
         selectedOption: selectedOption }
     });
   }
 
   // Submit
   const submit = async () => {
-    const { name, color } = state;
-    const candy = state[candyQuestion.questionName];
+    let questionResponses = [];
 
-    // Find which option is selected
-    var likesCandy = '';
-    for (var i = 0; i < candy.length; i++) {
-      if (candy[i].isSelected === true) {
-        likesCandy = candy[i].optionText;
-        break;
-      }
+    // Convert the state object to an array of responses
+    for (const [questionName, response] of Object.entries(state)) {
+      questionResponses.push({
+        [questionName]: response
+      });
     }
 
-    await Database.answers.add({
-      name, color, likesCandy
-    });
+    await db.responses.add({ responseData: questionResponses });
     clear();
   }
 
   const deleteItem = (id) => {
-    Database.answers.delete(id);
+    db.responses.delete(id);
   }
 
   // Clear
   const clear = () => {
     dispatch({
       type: CLEAR,
-      payload: candyQuestion.questionName
+      payload: initialState
     });
   }
 
+  // Dynamically set the provider's values
+  // The Provider updates whenever providerValue changes, so wrap this logic in a function so that providerValue updates only once
+  const setProviderValues = (qArray, initProviderValues) => {
+    let newValues = {...initProviderValues};
+    qArray.forEach(question => {
+      newValues = {
+        ...newValues,
+        [question.questionName]: state[question.questionName]
+      }
+    })
+
+    return newValues;
+  }
+
+  const functionSet = {
+    setMultChoice,
+    setShortAnswer,
+    submit,
+    deleteItem,
+    clear
+  }
+
+  // Dynamically set the provider's values
+  const providerValues = setProviderValues(questionsArray, functionSet);
+
   return (
-    <SurveyContext.Provider
-      value={{
-        name: state.name,
-        color: state.color,
-        [candyQuestion.questionName]: state[candyQuestion.questionName],
-        setName,
-        setColor,
-        setMultChoice,
-        setShortAnswer,
-        submit,
-        deleteItem,
-        clear
-      }}
-    >
-      {props.children}
+    <SurveyContext.Provider value={providerValues}>
+      {children}
     </SurveyContext.Provider>
   );
 }

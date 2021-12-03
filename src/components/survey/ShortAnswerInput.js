@@ -1,10 +1,13 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
 import PropTypes from 'prop-types';
-
 import { useLiveQuery } from 'dexie-react-hooks';
+
+import SurveyContext from '../../context/survey/surveyContext';
 import { demoSurveyDB_v1 as db } from '../../model/database/Database';
 
 const ShortAnswerInput = ({ questionKey }) => {
+  const surveyContext = useContext(SurveyContext);
+
   const stateData = useLiveQuery(() =>
     db.state.get(questionKey), []);
 
@@ -12,15 +15,11 @@ const ShortAnswerInput = ({ questionKey }) => {
     return null;
   }
 
-  const { questionText, response } = stateData.questionData;
+  const { questionText, questionName } = stateData.questionData;
 
   const onChange = (event) => {
-    let newResponse = event.target.value;
-
-    // Dexie requires this dot notation when updating properties that are nested within other properties
-    db.state.update(questionKey, {
-      "questionData.response": newResponse
-    });
+    let response = event.target.value;
+    surveyContext.setShortAnswer(questionName, response);
   }
 
   return (
@@ -31,7 +30,7 @@ const ShortAnswerInput = ({ questionKey }) => {
           <input 
             className='input' 
             type="text"
-            value={response}
+            value={surveyContext[questionName]}
             onChange={onChange}/>
         </div>
       </div>

@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-
 import { useLiveQuery } from 'dexie-react-hooks';
+
+import SurveyContext from '../../context/survey/surveyContext';
 import { demoSurveyDB_v1 as db } from '../../model/database/Database';
-import Option from '../../model/survey/Option';
 
 const MultChoiceInput = ({ questionKey }) => {
+  const surveyContext = useContext(SurveyContext);
+
   const stateData = useLiveQuery(() => 
     db.state.get(questionKey), []);
 
@@ -13,23 +15,13 @@ const MultChoiceInput = ({ questionKey }) => {
     return null;
   }
 
-  const { questionName, questionText, options } = stateData.questionData;
+  const { questionName, questionText } = stateData.questionData;
+  const options = surveyContext[questionName];
 
   const onChange = (event) => {
     let selectedOption = event.target.value;
-    const updatedOptions = options.map(({ optionText }) => {
-      if (optionText === selectedOption) {
-        return new Option(optionText, true);
-      }
-      else {
-        return new Option(optionText, false);
-      }
-    });
-
-    // Dexie requires this dot notation when updating properties that are nested within other properties
-    db.state.update(questionKey, {
-      "questionData.options": updatedOptions
-    });
+    console.log(event.target)
+    surveyContext.setMultChoice(questionName, selectedOption);
   };
 
   return (
@@ -40,7 +32,7 @@ const MultChoiceInput = ({ questionKey }) => {
         {options ? options.map(({ optionText, isSelected }) =>
           <div className="control" key={optionText}>
             <label className="radio">
-              <input type="radio" name={questionName} id={optionText} value={optionText} checked={isSelected} onChange={onChange}/> {optionText}
+              <input type="radio" name={questionName} value={optionText} checked={isSelected} onChange={onChange}/> {optionText}
             </label>
           </div>
         ) : null}
