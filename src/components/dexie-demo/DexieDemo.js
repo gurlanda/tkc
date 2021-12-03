@@ -2,11 +2,10 @@ import React, { Fragment } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks';
 import SampleItem from './SampleItem';
 
-import Database from '../../database/Database';
+import { Database } from '../../model/database/Database';
 
 const DexieDemo = () => {
   const allItems = useLiveQuery(() => Database.answers.toArray(), []);
-  console.log(allItems);
 
   if (!allItems) return <h1 className='title'>No items yet!</h1>;
 

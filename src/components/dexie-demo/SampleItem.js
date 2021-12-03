@@ -1,19 +1,21 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import Database from '../../database/Database';
+import SurveyContext from '../../context/survey/surveyContext';
 
-const SampleItem = ({ item, key }) => {
+const SampleItem = ({ item }) => {
+  const surveyContext = useContext(SurveyContext);
+
   const { id, name, color, likesCandy } = item;
 
-  const deleteItem = () => {
-    Database.answers.delete(id);
+  const onClickDelete = () => {
+    surveyContext.deleteItem(id);
   }
 
   return (
     <div className="card ">
       <div className="card-header is-shadowless pr-3">
         <h1 className="card-header-title title mb-0">{name}</h1>
-        <button className='button is-danger card-header-icon my-auto' onClick={deleteItem}>Delete</button>
+        <button className='button is-danger card-header-icon my-auto' onClick={onClickDelete}>Delete</button>
       </div>
       <div className="card-content">
         <div className="level">
@@ -38,8 +40,7 @@ const SampleItem = ({ item, key }) => {
 }
 
 SampleItem.propTypes = {
-  item: PropTypes.object.isRequired,
-  key: PropTypes.number.isRequired
+  item: PropTypes.object.isRequired
 }
 
 export default SampleItem;
